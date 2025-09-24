@@ -64,7 +64,7 @@ def main():
             progress_data["xp"] += 10
             save_progress(progress_data)
             st.success(random.choice(quotes))
-            st.experimental_rerun()
+            st.rerun()
 
     else:
         st.success("🎉 Congratulations! You’ve completed ALL lessons!")

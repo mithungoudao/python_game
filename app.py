@@ -59,6 +59,9 @@ def main():
     # --- Layout (content left, notes right) ---
     col1, col2 = st.columns([2, 1])
 
+    # -------------------
+    # Left column (Lessons)
+    # -------------------
     with col1:
         if current_index < total:
             st.subheader(f"📖 Lesson {current_index+1} of {total}")
@@ -85,15 +88,23 @@ def main():
             st.info(f"Final Score → ⭐ XP: {xp} | 🆙 Level: {level}")
             st.snow()
 
+    # -------------------
+    # Right column (Notes)
+    # -------------------
     with col2:
         st.subheader("📝 Your Notes")
+
+        # Initialize session state for text area
+        if "note_area" not in st.session_state:
+            st.session_state.note_area = ""
+
         note_input = st.text_area("Write a short note here...", key="note_area")
 
         if st.button("💾 Save Note"):
             if note_input.strip():
                 save_note(note_input.strip())
                 st.success("✅ Note saved!")
-                st.session_state.note_area = ""  # reset text area
+                st.session_state.note_area = ""  # reset safely
                 st.rerun()
             else:
                 st.warning("⚠️ Please write something before saving.")

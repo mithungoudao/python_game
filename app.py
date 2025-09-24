@@ -1,14 +1,29 @@
 import streamlit as st
+import json
+import os
 import random
 import math
 
-# --- Step 1: Load URLs from text file ---
+PROGRESS_FILE = "progress.json"
+
+# --- Load URLs ---
 def load_urls(file_path="urls.txt"):
     with open(file_path, "r") as f:
         urls = [line.strip() for line in f if line.strip()]
     return urls
 
-# Motivational quotes
+# --- Load progress ---
+def load_progress():
+    if os.path.exists(PROGRESS_FILE):
+        with open(PROGRESS_FILE, "r") as f:
+            return json.load(f)
+    return {"index": 0, "xp": 0}
+
+# --- Save progress ---
+def save_progress(progress):
+    with open(PROGRESS_FILE, "w") as f:
+        json.dump(progress, f)
+
 quotes = [
     "🔥 Keep going, you’re crushing it!",
     "💡 Every click makes you smarter!",
@@ -20,23 +35,17 @@ quotes = [
 def main():
     st.set_page_config(page_title="Python Learning Game", page_icon="🐍")
 
-    st.title("🐍 Python Learning Tracker (Gamified Edition)")
+    st.title("🐍 Python Learning Tracker (Persistent Gamified Edition)")
 
     urls = load_urls("urls.txt")
-
-    # --- Session state ---
-    if "index" not in st.session_state:
-        st.session_state.index = 0
-    if "xp" not in st.session_state:
-        st.session_state.xp = 0
-
     total = len(urls)
-    current_index = st.session_state.index
 
-    # --- Calculate Progress ---
+    # Load saved progress
+    progress_data = load_progress()
+    current_index = progress_data["index"]
+    xp = progress_data["xp"]
     completed = current_index
     progress = completed / total
-    xp = st.session_state.xp
     level = math.floor(xp / 50) + 1
 
     if current_index < total:
@@ -51,8 +60,9 @@ def main():
 
         # Done button
         if st.button("✅ Done"):
-            st.session_state.index += 1
-            st.session_state.xp += 10  # Add XP
+            progress_data["index"] += 1
+            progress_data["xp"] += 10
+            save_progress(progress_data)
             st.success(random.choice(quotes))
             st.experimental_rerun()
 
@@ -61,9 +71,7 @@ def main():
         st.balloons()
         st.progress(1.0, text="100% completed")
         st.info(f"Final Score → ⭐ XP: {xp} | 🆙 Level: {level}")
-
-        if progress == 1:
-            st.snow()  # Extra fun
+        st.snow()
 
 if __name__ == "__main__":
     main()

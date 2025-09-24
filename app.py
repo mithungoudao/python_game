@@ -94,21 +94,29 @@ def main():
     with col2:
         st.subheader("📝 Your Notes")
 
-        # Initialize session state for text area
+        # Initialize state for reset handling
         if "note_area" not in st.session_state:
             st.session_state.note_area = ""
+        if "reset_note" not in st.session_state:
+            st.session_state.reset_note = False
 
-        note_input = st.text_area("Write a short note here...", key="note_area")
+        # Handle reset safely
+        default_text = "" if st.session_state.reset_note else st.session_state.note_area
+        note_input = st.text_area("Write a short note here...", value=default_text, key="note_area")
 
         if st.button("💾 Save Note"):
             if note_input.strip():
                 save_note(note_input.strip())
                 st.success("✅ Note saved!")
-                st.session_state.note_area = ""  # reset safely
+                st.session_state.reset_note = True  # trigger reset
                 st.rerun()
             else:
                 st.warning("⚠️ Please write something before saving.")
 
+        # Reset flag after rerun
+        st.session_state.reset_note = False
+
+        # Download existing notes
         if os.path.exists(NOTES_FILE):
             with open(NOTES_FILE, "r") as f:
                 notes_data = f.read()
